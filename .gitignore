@@ -1,0 +1,8 @@
+# For root directory
+.vscode
+node_modules/
+Readme.md
+.env
+blog-mern-682db-firebase-adminsdk-ycf64-122a2412cc.json
+requests.rest
+
