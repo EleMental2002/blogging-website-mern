@@ -6,14 +6,14 @@ import { removeFromSession } from "../common/session";
 
 const UserNavigationPanel = () => {
     const {
-        userAuth: { username }, setUserAuth
+        userAuth: { username },
+        setUserAuth,
     } = useContext(UserContext);
-
 
     const signOutUser = () => {
         removeFromSession("user");
-        setUserAuth({ access_token: null })
-    }
+        setUserAuth({ access_token: null });
+    };
 
     return (
         <AnimationWrapper
@@ -39,7 +39,8 @@ const UserNavigationPanel = () => {
                     Settings
                 </Link>
                 <span className="absolute border-t border-grey w-[100%]"></span>
-                <button className="text-left p-4 hover:bg-grey w-full pl-8 py-4"
+                <button
+                    className="text-left p-4 hover:bg-grey w-full pl-8 py-4"
                     onClick={signOutUser}
                 >
                     <h1 className="font-bold text-xl mg-1">Sign Out</h1>

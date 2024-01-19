@@ -9,43 +9,39 @@ import InlineCode from "@editorjs/inline-code";
 
 import { uploadImage } from "../common/aws";
 
-
 const uploadImageByFile = (e) => {
-    return uploadImage(e).then(url => {
+    return uploadImage(e).then((url) => {
         if (url) {
             return {
                 success: 1,
-                file: { url }
-            }
+                file: { url },
+            };
         }
-    })
-}
-
-
+    });
+};
 
 const uploadImageByURL = (e) => {
     let link = new Promise((resolve, reject) => {
         try {
-            resolve(e)
+            resolve(e);
+        } catch (err) {
+            reject(err);
         }
-        catch (err) {
-            reject(err)
-        }
-    })
+    });
 
-    return link.then(url => {
+    return link.then((url) => {
         return {
             success: 1,
-            file: { url }
-        }
-    })
-}
+            file: { url },
+        };
+    });
+};
 
 export const tools = {
     embed: Embed,
     list: {
         class: List,
-        inlineToolbar: true
+        inlineToolbar: true,
     },
     image: {
         class: Image,
@@ -53,21 +49,21 @@ export const tools = {
             uploader: {
                 uploadByUrl: uploadImageByURL,
                 uploadByFile: uploadImageByFile,
-            }
-        }
+            },
+        },
     },
     header: {
         class: Header,
         config: {
             placeholder: "Type Heading.....",
             levels: [2, 3, 4],
-            defaultLevel: 2
-        }
+            defaultLevel: 2,
+        },
     },
     quote: {
         class: Quote,
-        inlineToolbar: true
+        inlineToolbar: true,
     },
     marker: Marker,
-    inlineCode: InlineCode
-}
+    inlineCode: InlineCode,
+};

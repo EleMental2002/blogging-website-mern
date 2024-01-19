@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import admin from "firebase-admin";
-import serviceAccountKey from "./blog-mern-682db-firebase-adminsdk-ycf64-122a2412cc.json" assert { type: "json" };
+import serviceAccountKey from "./blog-mern-682db-firebase-adminsdk-ycf64-122a2412cc.json" assert {type: "json"};
 import { getAuth } from "firebase-admin/auth";
 import aws from "aws-sdk";
 
@@ -69,10 +69,7 @@ const verifyJWT = (req, res, next) => {
 };
 
 const formatDatatoSend = (user) => {
-  const access_token = jwt.sign(
-    { id: user._id },
-    process.env.SECRET_ACCESS_KEY
-  );
+  const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
 
   return {
     access_token,
@@ -187,12 +184,9 @@ server.post("/signin", (req, res) => {
         // return res.json({ "status": "got user document" });
         // console.log(user);
       } else {
-        return res
-          .status(403)
-          .json({
-            error:
-              "Account was created using google. Try logging in with google",
-          });
+        return res.status(403).json({
+          error: "Account was created using google. Try logging in with google",
+        });
       }
     })
     .catch((err) => {
@@ -224,12 +218,10 @@ server.post("/google-auth", async (req, res) => {
         });
       if (user) {
         if (!user.google_auth) {
-          return res
-            .status(403)
-            .json({
-              error:
-                "This email was signed up without google. Please log in with password to access the account.",
-            });
+          return res.status(403).json({
+            error:
+              "This email was signed up without google. Please log in with password to access the account.",
+          });
         }
       } else {
         let username = await generateUsername(email);
@@ -257,12 +249,10 @@ server.post("/google-auth", async (req, res) => {
       return res.status(200).json(formatDatatoSend(user));
     })
     .catch((err) => {
-      return res
-        .status(500)
-        .json({
-          error:
-            "Failed to authenticate you with google. Try with some other google account",
-        });
+      return res.status(500).json({
+        error:
+          "Failed to authenticate you with google. Try with some other google account",
+      });
     });
 });
 
@@ -289,17 +279,16 @@ server.get("/trending-blogs", (req, res) => {
 
 server.post("/all-latest-blogs-count", (req, res) => {
   Blog.countDocuments({ draft: false })
-    .then(count => {
-      return res.status(200).json({ totalDocs: count })
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err.message);
-      return res.status(500).json({ error: err.message })
-    })
-})
+      return res.status(500).json({ error: err.message });
+    });
+});
 
 server.post("/latest-blogs", (req, res) => {
-
   let { page } = req.body;
 
   let maxLimit = 2;
@@ -321,10 +310,18 @@ server.post("/latest-blogs", (req, res) => {
 });
 
 server.post("/search-blogs", (req, res) => {
-  let { tag, page } = req.body;
-  let findQuery = { tags: tag, draft: false }
+  let { tag, query, author, page } = req.body;
+  let findQuery;
 
-  let maxLimit = 1;
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if (author) {
+    findQuery = { author: author, draft: false };
+  }
+
+  let maxLimit = 5;
 
   Blog.find(findQuery)
     .populate(
@@ -341,23 +338,58 @@ server.post("/search-blogs", (req, res) => {
     .catch((err) => {
       return res.status(500).json({ error: err.message });
     });
-
-})
+});
 
 server.post("/search-blogs-count", (req, res) => {
-  let { tag } = req.body;
-
-  let findQuery = { tags: tag, draft: false }
+  let { tag, query, author } = req.body;
+  let findQuery;
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if (author) {
+    findQuery = { author: author, draft: false };
+  }
 
   Blog.countDocuments(findQuery)
     .then((count) => {
-      return res.status(200).json({ totalDocs: count })
+      return res.status(200).json({ totalDocs: count });
     })
     .catch((err) => {
       console.log(err.message);
       return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/search-users", (req, res) => {
+  let { query } = req.body;
+
+  User.find({ "personal_info.username": new RegExp(query, "i") })
+    .limit(50)
+    .select(
+      "personal_info.fullname personal_info.username personal_info.profile_img -_id"
+    )
+    .then((users) => {
+      return res.status(200).json({ users });
     })
-})
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/get-profile", (req, res) => {
+  let { username } = req.body;
+
+  User.findOne({ "personal_info.username": username })
+    .select("-personal_info.password -google_auth -updateAt -blogs")
+    .then((user) => {
+      return res.status(200).json(user);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.message });
+    });
+});
 
 server.post("/create-blog", verifyJWT, (req, res) => {
   let authorId = req.user;
@@ -370,11 +402,9 @@ server.post("/create-blog", verifyJWT, (req, res) => {
 
   if (!draft) {
     if (!des.length || des.length > 200) {
-      return res
-        .status(403)
-        .json({
-          error: "You must provide blog description under 200 characters",
-        });
+      return res.status(403).json({
+        error: "You must provide blog description under 200 characters",
+      });
     }
 
     if (!banner.length) {
@@ -390,11 +420,9 @@ server.post("/create-blog", verifyJWT, (req, res) => {
     }
 
     if (!tags.length || tags.length > 10) {
-      return res
-        .status(403)
-        .json({
-          error: "Provide tags in order to publish the blog, Maximum 10",
-        });
+      return res.status(403).json({
+        error: "Provide tags in order to publish the blog, Maximum 10",
+      });
     }
   }
 
