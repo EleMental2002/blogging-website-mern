@@ -68,9 +68,12 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
-const formatDatatoSend = (user) => {
-  const access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
+let access_token;
+const formatDatatoSend = (user, type) => {
+  if (type === "signin") {
+    access_token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_KEY);
 
+  }
   return {
     access_token,
     profile_img: user.personal_info.profile_img,
@@ -142,7 +145,7 @@ server.post("/signup", async (req, res) => {
     user
       .save()
       .then((u) => {
-        return res.status(200).json(formatDatatoSend(u));
+        return res.status(200).json(formatDatatoSend(u, "signup"));
       })
       .catch((err) => {
         return res.status(500).json({
@@ -150,7 +153,7 @@ server.post("/signup", async (req, res) => {
         });
       });
 
-    console.log(hashed_password);
+    // console.log(hashed_password);
   });
 
   // return res.status(200).json({ status: "OK" });
@@ -177,7 +180,7 @@ server.post("/signin", (req, res) => {
           if (!result) {
             return res.status(403).json({ error: "Incorrect credentials" });
           } else {
-            return res.status(200).json(formatDatatoSend(user));
+            return res.status(200).json(formatDatatoSend(user, "signin"));
           }
         });
 

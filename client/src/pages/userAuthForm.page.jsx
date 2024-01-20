@@ -1,7 +1,7 @@
 import React, { useContext, useRef } from "react";
 import InputBox from "../components/input.component";
 import googleIcon from "../imgs/google.png";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import AnimationWrapper from "../common/page-animation";
 import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
@@ -10,14 +10,15 @@ import { UserContext } from "../App";
 import { authWithGoogle } from "../common/firebase";
 
 const UserAuthForm = ({ type }) => {
-    const authForm = useRef();
+    // const authForm = useRef();
+    const navigate = useNavigate();
 
     let {
         userAuth: { access_token },
         setUserAuth,
     } = useContext(UserContext);
 
-    console.log(access_token);
+    // console.log(access_token);
 
     const userAuthThroughServer = (serverRoute, formData) => {
         axios
@@ -27,6 +28,8 @@ const UserAuthForm = ({ type }) => {
                 storeInSession("user", JSON.stringify(data));
                 // console.log(sessionStorage);
                 setUserAuth(data);
+                console.log(type, access_token);
+                type === "sign-up" ? navigate("/signin") : " ";
             })
             .catch(({ response }) => {
                 toast.error(response.data.error);
@@ -42,7 +45,8 @@ const UserAuthForm = ({ type }) => {
         let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
         //formData
-        let form = new FormData(authForm.current);
+        // let form = new FormData(authForm.current);
+        let form = new FormData(formElement);
         let formData = {};
 
         for (let [key, value] of form.entries()) {
@@ -100,9 +104,10 @@ const UserAuthForm = ({ type }) => {
             <section className="h-cover flex items-center justify-center">
                 <Toaster />
                 <form
-                    ref={authForm}
+                    // ref={authForm}
+                    id="formElement"
                     className="w-[80%] max-w-[400px]"
-                    onSubmit={handleSubmit}
+                // onSubmit={handleSubmit}
                 >
                     <h1 className="text-4xl font-gelasio capitalize text-center mb-24">
                         {type === "sign-in" ? "Welcome back" : "Join us today"}
@@ -133,7 +138,7 @@ const UserAuthForm = ({ type }) => {
                     <button
                         className="btn-dark center mt-14"
                         type="submit"
-                    // onClick={handleSubmit}
+                        onClick={handleSubmit}
                     >
                         {type.replace("-", " ")}
                     </button>
